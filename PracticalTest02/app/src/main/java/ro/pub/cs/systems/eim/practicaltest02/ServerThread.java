@@ -11,8 +11,10 @@ import org.apache.http.impl.client.DefaultHttpClient;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.ArrayList;
 import java.util.HashMap;
 
 import ro.pub.cs.systems.eim.practicaltest02.Constants;
@@ -22,6 +24,8 @@ public class ServerThread extends Thread {
 
     private int port = 0;
     private ServerSocket serverSocket = null;
+    private long time;
+    HashMap<InetAddress, Long> vals;
 
     private HashMap<String, WeatherForecastInformation> data = null;
 
@@ -36,6 +40,8 @@ public class ServerThread extends Thread {
             }
         }
         this.data = new HashMap<String, WeatherForecastInformation>();
+        time = -1;
+        vals = new HashMap<InetAddress, Long>();
     }
 
     public void setPort(int port) {
@@ -72,19 +78,47 @@ public class ServerThread extends Thread {
                 //CommunicationThread communicationThread = new CommunicationThread(this, socket);
                 //communicationThread.start();
 
-                HttpClient httpClient = new DefaultHttpClient();
-                HttpGet httpGet= new HttpGet("http://www.rimeapi.org/utc/now");
-                ResponseHandler<String> responseHandler = new BasicResponseHandler();
+                if (!vals.containsKey(socket.getInetAddress())) {
+                    vals.put(socket.getInetAddress(), System.currentTimeMillis());
+                    HttpClient httpClient = new DefaultHttpClient();
+                    HttpGet httpGet = new HttpGet("http://www.timeapi.org/utc/now");
+                    ResponseHandler<String> responseHandler = new BasicResponseHandler();
 
-                String content = "";
-                try {
-                    content = httpClient.execute(httpGet, responseHandler);
-                } catch(IOException e) {
-                    e.printStackTrace();
+                    String content = "";
+                    try {
+                        content = httpClient.execute(httpGet, responseHandler);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+
+                    PrintWriter writer = Utilities.getWriter(socket);
+                    writer.println(content);
+
+                } else {
+                    long currentTime = System.currentTimeMillis();
+                    if (currentTime - vals.get(socket.getInetAddress()) >= 5000) {
+
+                        HttpClient httpClient = new DefaultHttpClient();
+                        HttpGet httpGet = new HttpGet("http://www.timeapi.org/utc/now");
+                        ResponseHandler<String> responseHandler = new BasicResponseHandler();
+
+                        String content = "";
+                        try {
+                            content = httpClient.execute(httpGet, responseHandler);
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+
+                        PrintWriter writer = Utilities.getWriter(socket);
+                        writer.println(content);
+                        vals.put(socket.getInetAddress(), System.currentTimeMillis());
+
+                    } else {
+                        PrintWriter writer = Utilities.getWriter(socket);
+                        writer.println("NOT NOW!");
+                    }
                 }
 
-                PrintWriter writer = Utilities.getWriter(socket);
-                writer.println(content);
                 socket.close();
             }
         } catch (ClientProtocolException clientProtocolException) {

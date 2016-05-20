@@ -24,8 +24,6 @@ public class PracticalTest02MainActivity extends Activity {
     // Client widgets
     private EditText clientAddressEditText = null;
     private EditText clientPortEditText = null;
-    private EditText cityEditText = null;
-    private Spinner informationTypeSpinner = null;
     private Button getWeatherForecastButton = null;
     private TextView weatherForecastTextView = null;
 

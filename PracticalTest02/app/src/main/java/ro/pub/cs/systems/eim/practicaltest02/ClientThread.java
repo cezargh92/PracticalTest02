@@ -17,17 +17,18 @@ public class ClientThread extends Thread {
     private int port;
     private String city;
     private String informationType;
-    private TextView weatherForecastTextView;
+    private TextView timeTextView;
+    private double time;
 
     private Socket socket;
 
     public ClientThread(
             String address,
             int port,
-            TextView weatherForecastTextView) {
+            TextView timeTv) {
         this.address = address;
         this.port = port;
-        this.weatherForecastTextView = weatherForecastTextView;
+        this.timeTextView = timeTv;
     }
 
     @Override
@@ -48,10 +49,10 @@ public class ClientThread extends Thread {
                 String line;
                 while ((line = bufferedReader.readLine()) != null) {
                     final String serverTime = line;
-                    weatherForecastTextView.post(new Runnable() {
+                    timeTextView.post(new Runnable() {
                         @Override
                         public void run() {
-                            weatherForecastTextView.append(serverTime + "\n");
+                            timeTextView.setText(serverTime + "\n");
                         }
                     });
                 }
