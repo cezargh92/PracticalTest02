@@ -17,9 +17,6 @@ import java.net.Socket;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import ro.pub.cs.systems.eim.practicaltest02.Constants;
-import ro.pub.cs.systems.eim.practicaltest02.WeatherForecastInformation;
-
 public class ServerThread extends Thread {
 
     private int port = 0;
@@ -27,7 +24,6 @@ public class ServerThread extends Thread {
     private long time;
     HashMap<InetAddress, Long> vals;
 
-    private HashMap<String, WeatherForecastInformation> data = null;
 
     public ServerThread(int port) {
         this.port = port;
@@ -39,7 +35,6 @@ public class ServerThread extends Thread {
                 ioException.printStackTrace();
             }
         }
-        this.data = new HashMap<String, WeatherForecastInformation>();
         time = -1;
         vals = new HashMap<InetAddress, Long>();
     }
@@ -60,13 +55,6 @@ public class ServerThread extends Thread {
         return serverSocket;
     }
 
-    public synchronized void setData(String city, WeatherForecastInformation weatherForecastInformation) {
-        this.data.put(city, weatherForecastInformation);
-    }
-
-    public synchronized HashMap<String, WeatherForecastInformation> getData() {
-        return data;
-    }
 
     @Override
     public void run() {
@@ -75,8 +63,6 @@ public class ServerThread extends Thread {
                 Log.i(Constants.TAG, "[SERVER] Waiting for a connection...");
                 Socket socket = serverSocket.accept();
                 Log.i(Constants.TAG, "[SERVER] A connection request was received from " + socket.getInetAddress() + ":" + socket.getLocalPort());
-                //CommunicationThread communicationThread = new CommunicationThread(this, socket);
-                //communicationThread.start();
 
                 if (!vals.containsKey(socket.getInetAddress())) {
                     vals.put(socket.getInetAddress(), System.currentTimeMillis());
@@ -96,7 +82,7 @@ public class ServerThread extends Thread {
 
                 } else {
                     long currentTime = System.currentTimeMillis();
-                    if (currentTime - vals.get(socket.getInetAddress()) >= 5000) {
+                    if (currentTime - vals.get(socket.getInetAddress()) >= 5000) {//Am setat timpul mai mic decat 1min pentru a se putea observa mai bine efectul.
 
                         HttpClient httpClient = new DefaultHttpClient();
                         HttpGet httpGet = new HttpGet("http://www.timeapi.org/utc/now");
