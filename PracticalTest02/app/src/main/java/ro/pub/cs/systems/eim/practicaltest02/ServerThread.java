@@ -82,7 +82,7 @@ public class ServerThread extends Thread {
 
                 } else {
                     long currentTime = System.currentTimeMillis();
-                    if (currentTime - vals.get(socket.getInetAddress()) >= 5000) {//Am setat timpul mai mic decat 1min pentru a se putea observa mai bine efectul.
+                    if (currentTime - vals.get(socket.getInetAddress()) >= 5000) {//Am setat timpul mai mic decat 1min pentru a se putea observa mai rapid functionalitatea.
 
                         HttpClient httpClient = new DefaultHttpClient();
                         HttpGet httpGet = new HttpGet("http://www.timeapi.org/utc/now");
